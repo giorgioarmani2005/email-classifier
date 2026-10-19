@@ -2,15 +2,15 @@ from pydantic import BaseModel, EmailStr, Field, EmailStr, field_validator
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 
+
 class ContentRequest(BaseModel):
     content: str = Field(..., min_length=1, max_length=50_000)
 
 
-
 class UploadedEmlRequest(ContentRequest):
     filename: str
-    from_: EmailStr
-    to_: EmailStr
+    from_: EmailStr = Field(alias='from')
+    to_: EmailStr = Field(alias='to')
     subject: str | None = None
     date: datetime | None = None
 
@@ -25,8 +25,6 @@ class UploadedEmlRequest(ContentRequest):
         return value
 
 
-
-
 class AnalyzeResponse(BaseModel):
-    result: str
-    confidence: float
+    result: str | None = None       
+    confidence: float | None = None 
