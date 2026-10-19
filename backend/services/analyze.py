@@ -40,7 +40,3 @@ async def process_text(text_request: str) -> AnalyzeResponse:
         confidence=1
     )
 
-
-async def process_uploaded_file(file: UploadFile) -> AnalyzeResponse:
-    content = uploaded_repository.find_by_filename(file.filename)
-    return await process_text(content.content)

@@ -1,6 +1,6 @@
 from schemas.analyze import ContentRequest, UploadedEmlRequest
 
-
+#перепиши на одну бд History - статус писем: uploaded, analyzed. анонимные сессии через куки.
 class ContentRepository:
     def __init__(self):
         self.repository: list[ContentRequest] = []
@@ -13,6 +13,9 @@ class ContentRepository:
             if isinstance(content, UploadedEmlRequest) and content.filename == filename:
                 return content
         return None
+
+    def get_all(self) -> list[ContentRequest]:
+        return self.repository
 
 
 repository = ContentRepository()
