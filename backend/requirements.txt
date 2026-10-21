@@ -7,3 +7,4 @@ sqlalchemy[asyncio]>=2.0.30
 asyncpg>=0.29.0
 aiofiles
 python-multipart
+alembic>=1.12.0

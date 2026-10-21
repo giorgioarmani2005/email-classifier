@@ -1,18 +1,16 @@
 from db.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
-from sqlalchemy import DateTime, JSON, String, CheckConstraint, Text
+from sqlalchemy import DateTime, JSON, String, CheckConstraint
 
 
 class History(Base):
     __tablename__ = "analyze_history"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
     status: Mapped[str] = mapped_column(
         String(20),
         CheckConstraint(
             "status IN ('not_started','uploaded', 'analyzing', 'completed')"),
-        name='status_check',
         nullable=False,
         default="not_started"
     )

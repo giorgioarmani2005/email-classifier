@@ -6,8 +6,9 @@ from typing import Literal
 from schemas.analyze import ContentRequest
 
 
-
 class HistorySchema(BaseModel):
+    id: int
+
     model_config = ConfigDict(from_attributes=True)
 
     status: Literal['not_started', 'uploaded', 'analyzing',

@@ -6,11 +6,11 @@ all: setting_env run
 
 
 run: $(COMPOSE)
-	docker compose -f $(COMPOSE) up -d --build
+	docker compose --env-file ./.env -f $(COMPOSE) up -d --build
 
 
 clear: $(COMPOSE)
-	docker compose -f $(COMPOSE) down -v --rmi all --remove-orphans
+	docker compose  -f $(COMPOSE) down -v --rmi all --remove-orphans
 
 
 setting_env: .env.example

@@ -1,5 +1,5 @@
 from schemas.analyze import ContentRequest, UploadedEmlRequest
-from repository.abstract import AbstractRepository
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update
@@ -8,7 +8,7 @@ from models.history import History
 from datetime import datetime
 
 
-class HistoryRepository(AbstractRepository):
+class HistoryRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -30,7 +30,7 @@ class HistoryRepository(AbstractRepository):
             return history.id
 
         except Exception as e:
-            self.session.rollback()
+            await self.session.rollback()
             raise e
 
     async def get_content_by_client_id(self, client_id: str) -> list[History]:

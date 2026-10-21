@@ -4,7 +4,7 @@ import services.history as history_service
 import services.analyze as analyze_service
 from core.exception import InvalidFileExtensionError, InvalidContentError
 
-from dependencies import set_cookie
+from api.v1.dependencies import set_cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import get_session
 from datetime import datetime
@@ -62,7 +62,7 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
     response = await analyze_service.process_text(content.content)
 
     await history_service.update_history_record(session, history_id,
-                                                status='completed',
+                                                new_status='completed',
                                                 new_analyzed_date=datetime.now(),
                                                 new_analyzed_response=response.model_dump())
 
@@ -76,7 +76,7 @@ async def analyze_uploaded_files(client_id: str = Depends(set_cookie),
 
     contents = await history_service.get_content_by_client_id(client_id, session)
 
-    if not contents:
+    if not contents or not any(content.is_eml and content.status == 'uploaded' for content in contents):
         raise HTTPException(
             status_code=400,
             detail="Нет загруженных файлов для анализа",
@@ -84,12 +84,12 @@ async def analyze_uploaded_files(client_id: str = Depends(set_cookie),
     for content in contents:
         if content.is_eml and content.status == 'uploaded':
             # FIX id record
-            await history_service.update_history_record(session, content.id, status='analyzing')
+            await history_service.update_history_record(session, content.id, new_status='analyzing')
 
             # TODO: logic model
             response = await analyze_service.process_text(content.content)
 
-            await history_service.update_history_record(session, content.id, status='completed', new_analyzed_response=response)
+            await history_service.update_history_record(session, content.id, new_status='completed', new_analyzed_date=datetime.now(), new_analyzed_response=response)
 
     return {"status": "success",
             "message": "Файлы успешно проанализированы",

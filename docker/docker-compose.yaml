@@ -1,11 +1,26 @@
 services:
+
+  migrator:
+    container_name: email-classifier-migrator
+    build: ../backend/
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend_net
+    env_file:
+      - ../.env
+    command: ["alembic", "upgrade", "head"]
+    volumes:
+      - ../backend/migrations:/app/migrations
+  
   db:
     container_name: email-classifier-db
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${postgres_db}
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 10s
@@ -24,30 +39,30 @@ services:
         condition: service_healthy
     networks:
       - backend_net
-      - frontend_net
+     # - frontend_net
     ports:
       - "8000:8000"
     env_file:
       - ../.env
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').getcode()" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health').getcode()" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  frontend:
-    #TODO: Добавить проброс портов, после выбора фреймворка для фронтенда
-    container_name: email-classifier-frontend
-    build: ../frontend/
-    depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - frontend_net
+  # frontend:
+  #   #TODO: Добавить проброс портов, после выбора фреймворка для фронтенда
+  #   container_name: email-classifier-frontend
+  #   build: ../frontend/
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   networks:
+  #     - frontend_net
 
 volumes:
   pg_data:
 
 networks:
-  frontend_net:
+  #frontend_net:
   backend_net:
