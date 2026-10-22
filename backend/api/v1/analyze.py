@@ -61,10 +61,11 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
 
     response = await analyze_service.process_text(content.content)
 
+    #потом можно будет брокера подключить
     await history_service.update_history_record(session, history_id,
                                                 new_status='completed',
                                                 new_analyzed_date=datetime.now(),
-                                                new_analyzed_response=response.model_dump())
+                                                new_analyzed_response=response.model_dump(mode="json"))
 
     return {"status": "success",
             "message": "Текст успешно проанализирован"}
@@ -81,17 +82,18 @@ async def analyze_uploaded_files(client_id: str = Depends(set_cookie),
             status_code=400,
             detail="Нет загруженных файлов для анализа",
         )
-    for content in contents:
-        if content.is_eml and content.status == 'uploaded':
+    for eml in contents:
+        if eml.is_eml and eml.status == 'uploaded':
             # FIX id record
-            await history_service.update_history_record(session, content.id, new_status='analyzing')
+            await history_service.update_history_record(session, eml.id, new_status='analyzing')
 
             # TODO: logic model
-            response = await analyze_service.process_text(content.content)
+            response = await analyze_service.process_text(eml.content.content)
 
-            await history_service.update_history_record(session, content.id, new_status='completed', new_analyzed_date=datetime.now(), new_analyzed_response=response)
+            #потом можно будет брокера подключить
+            await history_service.update_history_record(session, eml.id, new_status='completed', new_analyzed_date=datetime.now(), new_analyzed_response=response.model_dump(mode="json"))
 
     return {"status": "success",
             "message": "Файлы успешно проанализированы",
-            "names": [content.filename for content in contents if isinstance(content, UploadedEmlRequest)]
+            "names": [eml.content.filename for eml in contents if isinstance(eml.content, UploadedEmlRequest)]
             }

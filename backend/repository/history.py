@@ -14,7 +14,7 @@ class HistoryRepository:
 
     async def create_history(self, status: str, content_request: ContentRequest, client_id: str) -> int:
         try:
-            src_data = content_request.model_dump()
+            src_data = content_request.model_dump(mode="json")
 
             history = History(
                 status=status,
@@ -33,11 +33,20 @@ class HistoryRepository:
             await self.session.rollback()
             raise e
 
-    async def get_content_by_client_id(self, client_id: str) -> list[History]:
+    async def get_content_by_client_id(self, client_id: str, sorted_field: str | None = None) -> list[History]:
         query = select(History).where(History.client_id == client_id)
+        if sorted_field:
+            query = query.order_by(getattr(History, sorted_field).desc())
+        else:
+            query = query.order_by(History.id.desc())
         result = await self.session.execute(query)
         return result.scalars().all()
 
+    async def get_content_by_history_id(self, client_id: str, history_id: int) -> History | None:
+        query = select(History).where(History.client_id == client_id, History.id == history_id)
+        result = await self.session.execute(query)
+        return result.scalars().first()
+    
     async def update_history_record(self, history_id: int, new_status: str | None = None, new_analyzed_date: datetime | None = None, new_analyzed_response: dict | None = None) -> None:
 
         update_data = {}

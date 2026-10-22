@@ -8,3 +8,4 @@ asyncpg>=0.29.0
 aiofiles
 python-multipart
 alembic>=1.12.0
+email-validator

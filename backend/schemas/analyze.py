@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, EmailStr, field_validator, ConfigDict
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 
@@ -8,6 +8,7 @@ class ContentRequest(BaseModel):
 
 
 class UploadedEmlRequest(ContentRequest):
+    model_config = ConfigDict(populate_by_name=True)
     filename: str
     from_: EmailStr = Field(alias='from')
     to_: EmailStr = Field(alias='to')
@@ -21,10 +22,10 @@ class UploadedEmlRequest(ContentRequest):
             try:
                 return parsedate_to_datetime(value)
             except Exception:
-                raise ValueError("Неверный формат даты email")
+                return value
         return value
 
 
 class AnalyzeResponse(BaseModel):
-    result: str | None = None       
-    confidence: float | None = None 
+    result: str | None = None
+    confidence: float | None = None

@@ -45,12 +45,20 @@ async def new_history(status: str, content_request: ContentRequest, client_id: s
     return await repo.create_history(status, content_request, client_id)
 
 
-async def get_content_by_client_id(client_id: str, session: AsyncSession) -> list[HistorySchema]:
+async def get_content_by_client_id(client_id: str, session: AsyncSession, sorted_field: str | None = None) -> list[HistorySchema]:
     repo = HistoryRepository(session)
-    histories = await repo.get_content_by_client_id(client_id)
+    histories = await repo.get_content_by_client_id(client_id, sorted_field)
     return [HistorySchema.model_validate(history) for history in histories]
 
 
 async def update_history_record(session: AsyncSession, history_id: int, new_status: str | None = None, new_analyzed_date: datetime | None = None, new_analyzed_response: dict | None = None) -> None:
     repo = HistoryRepository(session)
     await repo.update_history_record(history_id, new_status, new_analyzed_date, new_analyzed_response)
+
+
+async def get_history_by_id(history_id: int, client_id: str, session: AsyncSession) -> HistorySchema | None:
+    repo = HistoryRepository(session)
+    history = await repo.get_content_by_history_id(client_id, history_id)
+    if history:
+        return HistorySchema.model_validate(history)
+    return None
