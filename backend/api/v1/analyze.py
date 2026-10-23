@@ -64,7 +64,7 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
 
     response = await analyze_service.process_text(content.content)
 
-    # потом можно будет брокера подключить
+    # потом можно будет брокера подключить+celery
     await history_service.update_history_record(session, history_id,
                                                 new_status='completed',
                                                 new_analyzed_date=datetime.now(),
@@ -80,22 +80,27 @@ async def analyze_uploaded_files(client_id: str = Depends(set_cookie),
 
     contents = await history_service.get_content_by_client_id(client_id, session)
 
-    to_analyze = [eml for eml in contents if eml.is_eml and eml.status == 'uploaded']
+    to_analyze = [
+        eml for eml in contents if eml.is_eml and eml.status == 'uploaded']
 
     if not to_analyze:
-        raise HTTPException(status_code=400, detail="Нет загруженных файлов для анализа")
+        raise HTTPException(
+            status_code=400, detail="Нет загруженных файлов для анализа")
 
     for eml in to_analyze:
         await history_service.update_history_record(session, eml.id, new_status='analyzing')
 
-    tasks = [run_in_threadpool(analyze_service.process_text, eml.content.content) for eml in to_analyze]
+    tasks = [run_in_threadpool(
+        analyze_service.process_text, eml.content.content) for eml in to_analyze]
+
     responses = await asyncio.gather(*tasks)
 
+    # преимущества нет, один из вариантов это делать 1 коммит
     for eml, response in zip(to_analyze, responses):
         await history_service.update_history_record(
-            session, 
-            eml.id, 
-            new_status='completed', 
+            session,
+            eml.id,
+            new_status='completed',
             new_analyzed_date=datetime.now(),
             new_analyzed_response=response.model_dump(mode="json")
         )
