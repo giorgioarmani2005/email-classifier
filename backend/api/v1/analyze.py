@@ -62,7 +62,9 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
         )
     history_id = await history_service.new_history('analyzing', content, client_id, session)
 
-    response = await analyze_service.process_text(content.content)
+    # Я так понимаю ты тут просто зыбыл добавить run_in_threadpool. Поправь если не так
+    # response = await analyze_service.process_text(content.content)
+    response = await run_in_threadpool(analyze_service.process_text, content.content)
 
     # потом можно будет брокера подключить+celery
     await history_service.update_history_record(session, history_id,
