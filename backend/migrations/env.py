@@ -12,6 +12,8 @@ from db.config import settings
 from db.base import Base
 from models.history import History  # noqa
 
+import asyncpg
+
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.get_postgres_url())
 
@@ -19,6 +21,16 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+
+async def ensure_database():
+    conn = await asyncpg.connect(user=settings.postgres_user, password=settings.postgres_password, host=settings.postgres_host, port=settings.postgres_port, database="postgres")
+    try:
+        exists = await conn.fetchval("SELECT 1 FROM pg_database WHERE datname = $1", settings.postgres_db)
+        if not exists:
+            await conn.execute(f'CREATE DATABASE "{settings.postgres_db}"')
+    finally:
+        await conn.close()
 
 
 def run_migrations_offline() -> None:
@@ -46,6 +58,8 @@ async def run_async_migrations() -> None:
     """In this scenario we need to create an Engine
     and associate a connection with the context.
     """
+    await ensure_database()
+
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
