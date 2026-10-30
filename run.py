@@ -27,7 +27,8 @@ if len(argv) > 1 and "migrate".startswith(argv[1]):
 
 
 if len(argv) <= 1 or "run".startswith(argv[1]):
-    server = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"], cwd="./backend", creationflags=CREATE_NEW_PROCESS_GROUP)
+    backend  = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"], cwd="./backend", creationflags=CREATE_NEW_PROCESS_GROUP)
+    frontend = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5500"], cwd="./frontend", creationflags=CREATE_NEW_PROCESS_GROUP)
 
     try:
         while True:
@@ -35,5 +36,7 @@ if len(argv) <= 1 or "run".startswith(argv[1]):
     except KeyboardInterrupt:
         print("А всьо...")
 
-    server.send_signal(signal.CTRL_BREAK_EVENT)
-    server.wait()
+    backend.send_signal(signal.CTRL_BREAK_EVENT)
+    frontend.send_signal(signal.CTRL_BREAK_EVENT)
+    backend.wait()
+    frontend.wait()

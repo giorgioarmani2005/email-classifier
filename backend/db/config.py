@@ -9,6 +9,10 @@ class Settings(BaseSettings):
   postgres_host: str
   postgres_port: int
   postgres_db: str
+  backend_host: str
+  backend_port: int
+  frontend_host: str
+  frontend_port: int
 
   model_config = SettingsConfigDict(
       env_file=f"{BASE_DIR}/.env", env_file_encoding="utf-8"

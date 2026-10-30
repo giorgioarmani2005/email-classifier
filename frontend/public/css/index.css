@@ -1,0 +1,426 @@
+
+@keyframes twinkle {
+    from {
+        opacity: 0.3;
+        transform: scale(0.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1.4);
+    }
+}
+
+@font-face{
+    font-family: "gwen";
+    src: url("../assets/fonts/Gwendolyn/Gwendolyn-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face{
+    font-family: "gwen";
+    src: url("../assets/fonts/Gwendolyn/Gwendolyn-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-BoldItalic.ttf") format("truetype");
+    font-weight: bold;
+    font-style: italic;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-Light.ttf") format("truetype");
+    font-weight: light;
+    font-style: normal;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-LightItalic.ttf") format("truetype");
+    font-weight: light;
+    font-style: italic;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-Medium.ttf") format("truetype");
+    font-weight: medium;
+    font-style: normal;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-MediumItalic.ttf") format("truetype");
+    font-weight: medium;
+    font-style: italic;
+}
+@font-face{
+    font-family: "iosevka";
+    src: url("../assets/fonts/Iosevka/IosevkaCharonMono-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "inter";
+    src: url(../assets/fonts/Inter/Inter-Italic-VariableFont_opsz,wght.ttf) format("truetype"); 
+    font-weight: 100 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "inter";
+    src: url(../assets/fonts/Inter/Inter-VariableFont_opsz,wght.ttf) format("truetype"); 
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+
+
+
+
+
+
+
+:root{
+    --bg_color1: #111735;
+    --bg_color2: #02030b;
+    --color1: #bee6fa;
+
+    --star_color0: #a9d5ff;
+    --star_color1: #fff1a9;
+    --star_color2: #c9a9ff;
+} 
+
+
+/* :root{
+    --bg_color1: #e6e6e6;
+    --bg_color2: #858585;
+    --color1: #000;
+
+    --star_color0: #000;
+    --star_color1: #000;
+    --star_color2: #000;
+} */
+
+
+
+.background{
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(ellipse at bottom, var(--bg_color1), var(--bg_color2) 80%);
+    overflow: hidden;
+}
+
+.background > .star{
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    top: var(--y);
+    left: var(--x);
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 0 6px 2px var(--color);
+    animation: twinkle 3s ease-in-out infinite alternate;
+    animation-delay: var(--shift);
+    filter: blur(0.2px);
+    scale: var(--size);
+    transition: top 0.6s, left 0.6s;
+}
+
+.background.formed > .star.form{
+    top: var(--y_f);
+    left: var(--x_f);
+}
+
+.background > .star::before, .background > .star::after{
+    content: "";
+    position: absolute;
+    background: linear-gradient(transparent, #fff, transparent);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.background > .star::before {
+    width: 1px;
+    height: 18px;
+}
+
+.background > .star::after { 
+    width: 18px;
+    height: 1px;    
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+}
+
+
+.background > .title{
+    position: absolute;
+    font-family: "gwen";
+    font-weight: bold;
+    font-size: 5rem;
+    text-align: center;
+    top: 50%;
+    left: calc(50% - 10px);
+    text-wrap: nowrap;
+    transform: translate(-50%, -50%);
+    
+    opacity: 0;
+
+    transition: opacity 0.8s;
+}
+
+.background.formed > .title{
+    opacity: 1;
+}
+
+body{
+    color: var(--color1);
+    margin: 0;
+    background-color: var(--bg_color2);
+    font-family: "iosevka";
+}
+
+
+
+
+.filler {
+    height: 100vh;
+}
+
+
+
+
+
+.content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 0.6rem;
+    margin: 2rem;
+    width: calc(100% - 4rem);
+    max-width: 50rem;
+    height: 41rem;
+
+    border-color: var(--color1);
+    border-width: 0.04rem;
+    border-style: solid;
+    background-color: #00000024;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 50px -10px var(--color1);
+}
+
+.input.success {
+    border-color: #3fff22;
+}
+
+.input.error {
+    border-color: #ff2222;
+}
+
+.input * {
+    transition: opacity 0.2s, padding 0.2s, width 0.2s, height 0.2s;
+}
+
+.input > * {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    width: 7rem;
+    height: 7rem;
+    /* background-color: red; */
+}
+
+.input > * > p {
+    font-size: 0.8rem;
+    position: absolute;
+    top: -1.5rem;
+    width: max-content;
+    filter: brightness(50%);
+    user-select: none;
+}
+
+.input > .file svg {
+    fill: var(--color1);
+    width: 5rem;
+    transition: scale 0.2s;
+}
+
+.input > .file svg:hover{
+    scale: 1.07;
+}
+
+.input > .file svg:active{
+    scale: 1;
+}
+
+.input > .or{
+    font-size: 1.5rem;
+    font-weight: bold;
+    user-select: none;
+}
+
+.input > .text textarea{
+    font-family: "inter";
+
+    box-sizing: border-box;
+    
+    width: 6rem;
+    height: 2rem;
+    border-radius: 0.3rem;
+    color: var(--color1);
+    padding: 0.3rem 0.5rem;
+
+    border-color: var(--color1);
+    border-width: 0.04rem;
+    border-style: solid;
+    background-color: #00000000;
+    transition: scale 0.2s;
+
+    resize: none;
+}
+
+.input > .text textarea:focus{
+    box-shadow: 0 0 7px 2px var(--color1);
+    outline: none;
+}
+
+.input > .text textarea:hover{
+    scale: 1.07;
+}
+
+.input > .text textarea:active{
+    scale: 1;
+}
+
+.input > .text textarea::placeholder{
+    color: var(--color1);
+    opacity: 0.5;
+}
+
+
+
+.input.show-text > .file, .input.show-text > .or, .input.show-text > .text p {
+    opacity: 0;
+}
+
+.input.show-text > * {
+    width: 0%;
+}
+
+.input.show-text > .text {
+    width: 100%;
+    height: 100%;
+}
+
+.input.show-text > .text textarea {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.6rem;
+    padding: 1rem;
+}
+
+.input.show-text > .text textarea:hover{
+    scale: 1;
+}
+
+.input.show-text > .text textarea:active{
+    scale: 1;
+}
+
+
+
+
+
+
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    /* background-color: red; */
+    width: calc(100% - 4rem);
+    max-width: 50rem;
+}
+
+.controls > button {
+    border-color: var(--color1);
+    border-width: 0.04rem;
+    border-style: solid;
+    background-color: #00000000;
+    border-radius: 100rem;
+    color: var(--color1);
+    width: 14rem;
+    
+    padding: 1rem;
+    font-family: "iosevka";
+    font-weight: bold;
+    font-size: 1rem;
+    
+    background-color: #00000024;
+    backdrop-filter: blur(7px);
+    box-shadow: 0 0 20px -10px var(--color1);
+    
+    user-select: none;
+
+    transition: scale 0.2s opacity 0.2s box-shadow 0.2s;
+}
+
+.controls > button:hover{
+    scale: 1.07;
+}
+
+.controls > button:active{
+    scale: 1;
+    box-shadow: 0 0 20px -2px var(--color1);
+}
+
+.controls > button:disabled{
+    scale: 0.9;
+    opacity: 0.8;
+    box-shadow: 0 0 0 0;
+    pointer-events: none;
+}
+
+
+
+
+
+
+
+
+* {
+    scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+    display: none; 
+}
+
+
