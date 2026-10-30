@@ -232,14 +232,6 @@ body{
     box-shadow: 0 0 50px -10px var(--color1);
 }
 
-.input.success {
-    border-color: #3fff22;
-}
-
-.input.error {
-    border-color: #ff2222;
-}
-
 .input * {
     transition: opacity 0.2s, padding 0.2s, width 0.2s, height 0.2s;
 }
@@ -300,7 +292,7 @@ body{
     border-width: 0.04rem;
     border-style: solid;
     background-color: #00000000;
-    transition: scale 0.2s;
+    transition: scale 0.2s, width 0.2s, height 0.2s;
 
     resize: none;
 }
@@ -389,7 +381,7 @@ body{
     
     user-select: none;
 
-    transition: scale 0.2s opacity 0.2s box-shadow 0.2s;
+    transition: scale 0.2s, opacity 0.2s, box-shadow 0.2s;
 }
 
 .controls > button:hover{

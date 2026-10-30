@@ -3,6 +3,7 @@ from subprocess import Popen, run, signal, CREATE_NEW_PROCESS_GROUP
 from time import sleep
 from os import system, name
 from sys import argv
+from config import settings
 
 
 
@@ -27,8 +28,9 @@ if len(argv) > 1 and "migrate".startswith(argv[1]):
 
 
 if len(argv) <= 1 or "run".startswith(argv[1]):
-    backend  = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"], cwd="./backend", creationflags=CREATE_NEW_PROCESS_GROUP)
-    frontend = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5500"], cwd="./frontend", creationflags=CREATE_NEW_PROCESS_GROUP)
+    run("py setup.py", cwd="./frontend")
+    backend  = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", str(settings.backend_port)], cwd="./backend", creationflags=CREATE_NEW_PROCESS_GROUP)
+    # frontend = Popen(["uvicorn", "main:app", "--host", "0.0.0.0", "--port", str(settings.frontend_port)], cwd="./frontend", creationflags=CREATE_NEW_PROCESS_GROUP)
 
     try:
         while True:
@@ -37,6 +39,6 @@ if len(argv) <= 1 or "run".startswith(argv[1]):
         print("А всьо...")
 
     backend.send_signal(signal.CTRL_BREAK_EVENT)
-    frontend.send_signal(signal.CTRL_BREAK_EVENT)
+    # frontend.send_signal(signal.CTRL_BREAK_EVENT)
     backend.wait()
-    frontend.wait()
+    # frontend.wait()

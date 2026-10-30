@@ -1,25 +1,10 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(BASE_DIR))
 
-class Settings(BaseSettings):
-  postgres_user: str
-  postgres_password: str
-  postgres_host: str
-  postgres_port: int
-  postgres_db: str
-  backend_host: str
-  backend_port: int
-  frontend_host: str
-  frontend_port: int
+from config import settings
 
-  model_config = SettingsConfigDict(
-      env_file=f"{BASE_DIR}/.env", env_file_encoding="utf-8"
-  )
-
-  def get_postgres_url(self) -> str:
-      return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
-
-
-settings = Settings()
+# setting очень полезная штука поэтому я стыбзил её и перенёс в корень проекта

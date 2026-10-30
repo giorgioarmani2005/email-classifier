@@ -179,10 +179,10 @@ button_analyze.addEventListener("click", async () => {
     response = await response.json();
 
     if(response.status == "success"){
-        input.classList.add('success')
+        textarea.value = "success"
     }
     else{
-        input.classList.add('error')
+        textarea.value = "error"
     }
 })
 
