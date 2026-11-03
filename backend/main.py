@@ -9,8 +9,8 @@ from api.v1.authors import router as authors_router
 from api.v1.analyze import router as analyze_router
 from api.v1.history import router as history_router
 
-
 app = FastAPI()
+
 
 # Хз что это, но без этого не работала апи-шка
 app.add_middleware(

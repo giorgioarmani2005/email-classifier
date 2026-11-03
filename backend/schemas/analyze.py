@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, EmailStr, field_validator, ConfigDict
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+from typing import List
 
 
 class ContentRequest(BaseModel):
@@ -27,5 +28,12 @@ class UploadedEmlRequest(ContentRequest):
 
 
 class AnalyzeResponse(BaseModel):
-    result: str | None = None
-    confidence: float | None = None
+    triage: str | None = None
+    triage_confidence: float | None = None
+    priority: str | None = None
+    priority_confidence: float | None = None
+    risk: str | None = None
+    risk_confidence: float | None = None
+    should_process: str | None = None
+    should_process_confidence: float | None = None
+    shap_indices: List[int] | None = None

@@ -12,7 +12,11 @@ from datetime import datetime
 import asyncio
 from starlette.concurrency import run_in_threadpool
 
+from ml.inference import TriageInference
+
+
 router = APIRouter(tags=["Analyze"], prefix="/api/v1")
+inference_model = TriageInference()
 
 
 @router.post("/upload")
@@ -64,7 +68,7 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
 
     # Я так понимаю ты тут просто зыбыл добавить run_in_threadpool. Поправь если не так
     # response = await analyze_service.process_text(content.content)
-    response = await run_in_threadpool(analyze_service.process_text, content.content)
+    response = await run_in_threadpool(analyze_service.process_text, content.content, inference_model)
 
     # потом можно будет брокера подключить+celery
     await history_service.update_history_record(session, history_id,
@@ -93,7 +97,7 @@ async def analyze_uploaded_files(client_id: str = Depends(set_cookie),
         await history_service.update_history_record(session, eml.id, new_status='analyzing')
 
     tasks = [run_in_threadpool(
-        analyze_service.process_text, eml.content.content) for eml in to_analyze]
+        analyze_service.process_text, eml.content.content, inference_model) for eml in to_analyze]
 
     responses = await asyncio.gather(*tasks)
 
