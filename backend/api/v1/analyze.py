@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, HTTPException, File, Depends
-from schemas.analyze import ContentRequest, UploadedEmlRequest
+from schemas.analyze import ContentRequest, UploadedEmlRequest, AnalyzeResponse
 import services.history as history_service
 import services.analyze as analyze_service
 from core.exception import InvalidFileExtensionError, InvalidContentError
@@ -57,7 +57,7 @@ async def upload_files(files: list[UploadFile] = File(...), client_id: str = Dep
 
 
 @router.post("/analyze/text")
-async def analyze_text(content: ContentRequest, client_id: str = Depends(set_cookie), session: AsyncSession = Depends(get_session)) -> dict:
+async def analyze_text(content: ContentRequest, client_id: str = Depends(set_cookie), session: AsyncSession = Depends(get_session)) -> AnalyzeResponse:
     # TODO: logic model
     if not content.content.strip():
         raise HTTPException(
@@ -76,8 +76,9 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
                                                 new_analyzed_date=datetime.now(),
                                                 new_analyzed_response=response.model_dump(mode="json"))
 
-    return {"status": "success",
-            "message": "Текст успешно проанализирован"}
+    # return {"status": "success",
+    #         "message": "Текст успешно проанализирован"}
+    return response
 
 
 @router.post("/analyze/files")

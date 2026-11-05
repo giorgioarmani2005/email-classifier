@@ -6,27 +6,102 @@
         <title>Just Check</title>
         <link rel="icon" href="assets/logo.png">
         <link rel="stylesheet" href="css/index.css">
+        <script src="js/config.js" defer></script>
         <script src="js/index.js" defer></script>
     </head>
     <body>
         <div class="background formed">
             <div class="title">Just Check</div>
         </div>
+        <header class="top-bar">
+            <div class="history dont-hide-history">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M 3 9 A 1.0001 1.0001 0 1 0 3 11 L 47 11 A 1.0001 1.0001 0 1 0 47 9 L 3 9 z M 3 24 A 1.0001 1.0001 0 1 0 3 26 L 47 26 A 1.0001 1.0001 0 1 0 47 24 L 3 24 z M 3 39 A 1.0001 1.0001 0 1 0 3 41 L 47 41 A 1.0001 1.0001 0 1 0 47 39 L 3 39 z"/></svg>
+            </div>
+            <div class="about">
+                <div>О нас</div>
+            </div>
+            <div class="contactus">
+                <div>Контакты</div>
+            </div>
+        </header>
+        <div class="side-bar-container">
+            <div class="filler"></div>
+            <div class="side-bar dont-hide-history">
+                <div class="title">История</div>
+                <div class="elem">
+                    <div class="text">Я найду тебя</div>
+                    <div class="date">8:52</div>
+                </div>
+                <div class="elem">
+                    <div class="text">Я найду тебя</div>
+                    <div class="date">8:52</div>
+                </div>
+                <div class="elem">
+                    <div class="text">Я найду тебя</div>
+                    <div class="date">6 окт.</div>
+                </div>
+                <div class="elem">
+                    <div class="text">Я найду тебя</div>
+                    <div class="date">6 окт.</div>
+                </div>
+                <div class="elem">
+                    <div class="text">Я найду тебя</div>
+                    <div class="date">6 окт.</div>
+                </div>
+            </div>
+        </div>
         <div class="filler"></div>
         <div class="content">
+            <div class="header-filler"></div>
             <div class="input">
                 <div class="file">
                     <p>Прикрепите</p>
                     <label for="file-input" class="file-input">
-                        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48"><path d="M 12.5 4 C 10.032499 4 8 6.0324991 8 8.5 L 8 39.5 C 8 41.967501 10.032499 44 12.5 44 L 35.5 44 C 37.967501 44 40 41.967501 40 39.5 L 40 18.5 A 1.50015 1.50015 0 0 0 39.560547 17.439453 L 39.544922 17.423828 L 26.560547 4.4394531 A 1.50015 1.50015 0 0 0 25.5 4 L 12.5 4 z M 12.5 7 L 24 7 L 24 15.5 C 24 17.967501 26.032499 20 28.5 20 L 37 20 L 37 39.5 C 37 40.346499 36.346499 41 35.5 41 L 12.5 41 C 11.653501 41 11 40.346499 11 39.5 L 11 8.5 C 11 7.6535009 11.653501 7 12.5 7 z M 27 9.1210938 L 34.878906 17 L 28.5 17 C 27.653501 17 27 16.346499 27 15.5 L 27 9.1210938 z M 17.5 25 A 1.50015 1.50015 0 1 0 17.5 28 L 30.5 28 A 1.50015 1.50015 0 1 0 30.5 25 L 17.5 25 z M 17.5 32 A 1.50015 1.50015 0 1 0 17.5 35 L 26.5 35 A 1.50015 1.50015 0 1 0 26.5 32 L 17.5 32 z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M 12.5 4 C 10.032499 4 8 6.0324991 8 8.5 L 8 39.5 C 8 41.967501 10.032499 44 12.5 44 L 35.5 44 C 37.967501 44 40 41.967501 40 39.5 L 40 18.5 A 1.50015 1.50015 0 0 0 39.560547 17.439453 L 39.544922 17.423828 L 26.560547 4.4394531 A 1.50015 1.50015 0 0 0 25.5 4 L 12.5 4 z M 12.5 7 L 24 7 L 24 15.5 C 24 17.967501 26.032499 20 28.5 20 L 37 20 L 37 39.5 C 37 40.346499 36.346499 41 35.5 41 L 12.5 41 C 11.653501 41 11 40.346499 11 39.5 L 11 8.5 C 11 7.6535009 11.653501 7 12.5 7 z M 27 9.1210938 L 34.878906 17 L 28.5 17 C 27.653501 17 27 16.346499 27 15.5 L 27 9.1210938 z M 17.5 25 A 1.50015 1.50015 0 1 0 17.5 28 L 30.5 28 A 1.50015 1.50015 0 1 0 30.5 25 L 17.5 25 z M 17.5 32 A 1.50015 1.50015 0 1 0 17.5 35 L 26.5 35 A 1.50015 1.50015 0 1 0 26.5 32 L 17.5 32 z"/></svg>
                     </label>
-                    <input id="file-input" type="file" accept=".txt, .c, .cpp, .html" hidden>
+                    <input id="file-input" type="file" accept=".txt, .c, .cpp, .html, .eml" hidden>
                 </div>
                 <div class="or">или</div>
                 <div class="text">
                     <p>Вставьте</p>
                     <textarea id="text-input" type="text" placeholder="Текст"></textarea>
+                    <div class="colored-words" style="display: none;"></div>
                 </div>            
+            </div>
+            <div class="result hidden">
+                
+                <div class="line triage" style="--len: 0.3;">
+                    <div class="title">
+                        <span class="name">Решение: </span>
+                        <span class="value">reply</span>
+                    </div>
+                    <div class="bar"></div>
+                </div>
+                
+                <div class="line priority" style="--len: 0.5;">
+                    <div class="title">
+                        <span class="name">Приоритет: </span>
+                        <span class="value">normal</span>
+                    </div>
+                    <div class="bar"></div>
+                </div>
+                
+                <div class="line risk" style="--len: 1;">
+                    <div class="title">
+                        <span class="name">Риск: </span>
+                        <span class="value">none</span>
+                    </div>
+                    <div class="bar"></div>
+                </div>
+
+                <div class="line should-process" style="--len: 0.05;">
+                    <div class="title">
+                        <span class="name">Обработать: </span>
+                        <span class="value">true</span>
+                    </div>
+                    <div class="bar"></div>
+                </div>
+
             </div>
             <div class="controls">
                 <button class="cancel">Отменить</button>

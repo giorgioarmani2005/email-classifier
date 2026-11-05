@@ -3,7 +3,7 @@ from datetime import datetime
 from email.utils import parsedate_to_datetime
 from typing import Literal
 
-from schemas.analyze import ContentRequest, UploadedEmlRequest
+from schemas.analyze import ContentRequest, UploadedEmlRequest, AnalyzeResponse
 
 
 class HistorySchema(BaseModel):
@@ -23,3 +23,16 @@ class HistorySchema(BaseModel):
     is_eml: bool = Field(default=False)
 
     client_id: str = Field(...)
+
+
+class HistoriesResponse(BaseModel):
+    ids: list[int]
+
+class HistoryResponse(BaseModel):
+    id: int
+    date: datetime | None = Field(default=None)
+    analyzed: AnalyzeResponse | None = Field(default=None)
+    content: str | None = Field(default=None)
+
+
+

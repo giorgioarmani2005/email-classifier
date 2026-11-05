@@ -15,3 +15,5 @@ def process_text(content: str, inference_model: TriageInference) -> AnalyzeRespo
         should_process_confidence=result["should_process"]["confidence"],
         shap_indices=result["shap_indices"],
     )
+
+

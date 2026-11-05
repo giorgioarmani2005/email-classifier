@@ -14,7 +14,7 @@ def contacts() -> AuthorsResponse:
         authors_names=[
             "Giorgio Studenko",
             "Andrew Abrosimov",
-            "Ivan Jivov",
+            "Ivan Zhivov",
             "Yulia Rodnova",
         ]
     )

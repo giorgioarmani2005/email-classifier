@@ -2,8 +2,9 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-BASE_DIR = Path(__file__).resolve().parent      # backend/
-ENV_FILE = BASE_DIR.parent / ".env"             # корень проекта (на хосте)
+# тут как будто надо два раза parent потому, что иначе мы в папке db 
+BASE_DIR = Path(__file__).resolve().parent.parent      # backend/
+ENV_FILE = BASE_DIR.parent / ".env"                    # корень проекта (на хосте)
 
 
 class Settings(BaseSettings):

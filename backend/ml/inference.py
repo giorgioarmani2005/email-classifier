@@ -55,41 +55,55 @@ def parse_content(content: str) -> str:
     content = _remove_citations(content)
     subject_m = re.search(r"^Subject:\s*(.+?)(?=\n\w+:|\Z)", content, re.I | re.M)
     body_m = re.search(r"^Body:\s*(.+)$", content, re.I | re.M | re.DOTALL)
-    if not (subject_m or body_m):
-        return ""
-    parts = []
-    if subject_m:
-        parts.append("Subject: " + subject_m.group(1).strip())
-    if body_m:
-        parts.append("Body: " + body_m.group(1).strip())
+
+    # У нас вообще никогда нету в письме Body и Subject, вообще возможно стоит подправить бэк, чтобы это добавить, но хотя бы так сделал пока
+    if subject_m or body_m:
+        parts = []
+        if subject_m:
+            parts.append("Subject: " + subject_m.group(1).strip())
+        if body_m:
+            parts.append("Body: " + body_m.group(1).strip())
+    else:
+        parts = ["Body: " + content.strip()]
+
     return re.sub(r"\s+", " ", " ".join(parts)).strip()
 
 
-def word_indices_in_content(content: str, words: list) -> list:
+def word_indices_in_content(content: str, words: list[str]) -> list[int]:
+    # понадобились индексы именно слов
+
     positions = []
-    seen = set()
-    counts = {}
-    low = content.lower()
-    for word in words:
-        if not word:
-            continue
-        w = word.lower()
-        nth = counts.get(w, 0)
-        counts[w] = nth + 1
-        start = -1
-        for _ in range(nth + 1):
-            start = low.find(w, start + 1)
-            if start == -1:
-                break
-        if start == -1:
-            continue
-        while start > 0 and not content[start - 1].isspace():
-            start -= 1
-        if start in seen:
-            continue
-        seen.add(start)
-        positions.append(start)
+    content = content.lower()
+    words = set(w.lower() for w in words if w != "" and not w.isspace())
+    for i, content_word in enumerate(w for w in content.split(" ") if w != "" and not w.isspace()):
+        if content_word in words:
+            positions.append(i)
     return positions
+
+    # positions = []
+    # seen = set()
+    # counts = {}
+    # low = content.lower()
+    # for word in words:
+    #     if not word:
+    #         continue
+    #     w = word.lower()
+    #     nth = counts.get(w, 0)
+    #     counts[w] = nth + 1
+    #     start = -1
+    #     for _ in range(nth + 1):
+    #         start = low.find(w, start + 1)
+    #         if start == -1:
+    #             break
+    #     if start == -1:
+    #         continue
+    #     while start > 0 and not content[start - 1].isspace():
+    #         start -= 1
+    #     if start in seen:
+    #         continue
+    #     seen.add(start)
+    #     positions.append(start)
+    # return sorted(positions) # А то не отсортированные неудобно
 
 class TriageInference:
     def __init__(self, ckpt_path: str = str(_DEFAULT_CKPT), n_shap: int = 200):
@@ -198,8 +212,9 @@ class TriageInference:
 
     def predict(self, content: str, top_k: int = 5) -> dict:
         cleaned = parse_content(content)
-        if not cleaned:
-            raise ValueError("no Subject/Body found in content")
+        # А то там бэк падал, я ещё в parse_content подправил
+        # if not cleaned:
+        #     raise ValueError("no Subject/Body found in content")
         result = self._predict_all(cleaned)
         explanation = self.explain(cleaned, "risk", top_k=max(top_k * 10, 50), pred=result["risk"])
         words = [e["word"] for e in explanation]
