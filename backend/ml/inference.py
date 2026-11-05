@@ -18,6 +18,7 @@ DISPLAY_STOPWORDS = {
     "to", "the", "a", "an", "of", "and", "in", "on", "at", "is", "are",
     "was", "were", "be", "been", "with", "for", "by", "from", "as",
     "that", "this", "it", "its", "these", "those", "we", "our",
+    "subject:", "body:", "re:", "fwd:", "fw:",
 }
 
 
@@ -69,41 +70,42 @@ def parse_content(content: str) -> str:
     return re.sub(r"\s+", " ", " ".join(parts)).strip()
 
 
-def word_indices_in_content(content: str, words: list[str]) -> list[int]:
-    # понадобились индексы именно слов
+def word_indices_in_content(content: str, words: list) -> list[int]:
+    tokens = content.split()
+    low_tokens = [t.lower() for t in tokens]
+
+    search_start = 0
+    for i, t in enumerate(low_tokens):
+        if t in ("subject:", "body:"):
+            search_start = i
+            break
 
     positions = []
-    content = content.lower()
-    words = set(w.lower() for w in words if w != "" and not w.isspace())
-    for i, content_word in enumerate(w for w in content.split(" ") if w != "" and not w.isspace()):
-        if content_word in words:
-            positions.append(i)
+    seen = set()
+    counts = {}
+    for entry in words:
+        if isinstance(entry, dict):
+            w = entry["word"].lower()
+            nth = entry["nth_in_cleaned"]
+        else:
+            w = entry.lower()
+            nth = counts.get(w, 0)
+            counts[w] = nth + 1
+        if not w:
+            continue
+        match_count = 0
+        found = -1
+        for i in range(search_start, len(low_tokens)):
+            if w in low_tokens[i]:
+                if match_count == nth:
+                    found = i
+                    break
+                match_count += 1
+        if found == -1 or found in seen:
+            continue
+        seen.add(found)
+        positions.append(found)
     return positions
-
-    # positions = []
-    # seen = set()
-    # counts = {}
-    # low = content.lower()
-    # for word in words:
-    #     if not word:
-    #         continue
-    #     w = word.lower()
-    #     nth = counts.get(w, 0)
-    #     counts[w] = nth + 1
-    #     start = -1
-    #     for _ in range(nth + 1):
-    #         start = low.find(w, start + 1)
-    #         if start == -1:
-    #             break
-    #     if start == -1:
-    #         continue
-    #     while start > 0 and not content[start - 1].isspace():
-    #         start -= 1
-    #     if start in seen:
-    #         continue
-    #     seen.add(start)
-    #     positions.append(start)
-    # return sorted(positions) # А то не отсортированные неудобно
 
 class TriageInference:
     def __init__(self, ckpt_path: str = str(_DEFAULT_CKPT), n_shap: int = 200):
@@ -201,25 +203,27 @@ class TriageInference:
         sv = self._get_explainer(head)([cleaned])
         vals = np.array(sv.values)[0]
         tokens = list(sv.data[0])
-        pairs = []
-        for tok, v in zip(tokens, vals[:, pred_idx]):
+
+        word_seen = {}
+        items = []
+        for i, (tok, v) in enumerate(zip(tokens, vals[:, pred_idx])):
             tok = str(tok).strip()
             if not tok or tok.lower() in DISPLAY_STOPWORDS:
                 continue
-            pairs.append({"word": tok, "contribution": float(v)})
-        pairs.sort(key=lambda x: -abs(x["contribution"]))
-        return pairs[:top_k]
+            w = tok.lower()
+            nth = word_seen.get(w, 0)
+            word_seen[w] = nth + 1
+            items.append({"word": tok, "nth_in_cleaned": nth, "contribution": float(v)})
+        items.sort(key=lambda x: -abs(x["contribution"]))
+        return items[:top_k]
+
 
     def predict(self, content: str, top_k: int = 5) -> dict:
         cleaned = parse_content(content)
-        # А то там бэк падал, я ещё в parse_content подправил
-        # if not cleaned:
-        #     raise ValueError("no Subject/Body found in content")
         result = self._predict_all(cleaned)
         explanation = self.explain(cleaned, "risk", top_k=max(top_k * 10, 50), pred=result["risk"])
-        words = [e["word"] for e in explanation]
-        positions = word_indices_in_content(content, words)
-        result["shap_indices"] = positions[:top_k]
+        positions = word_indices_in_content(content, explanation)
+        result["shap_indices"] = sorted(positions[:top_k])
         return result
 
     def __call__(self, content: str, **kwargs) -> dict:
