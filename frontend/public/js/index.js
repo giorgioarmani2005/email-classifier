@@ -17,6 +17,16 @@ function print(to_print){
 /**/                                                                 /**/
 /***********************************************************************/  
 
+
+function dismember(str, sep){
+    
+    let i = str.indexOf(sep)
+    if(i == -1){
+        return [str]
+    }
+    return [str.slice(0, i), str.slice(i + sep.length)]
+}
+
 function isspace(str){
     return str.length > 0 && /^\s+$/.test(str)
 }
@@ -129,14 +139,14 @@ class Input {
     }
 
     parse_eml(content){
-        content = content.split("\r\n\r\n")
+        content = dismember(content, "\r\n\r\n")
         if(content.length < 2){
-            content = content[0].split("\n\n")
+            content = dismember(content[0], "\n\n")
         }
         if(content.length < 2){
             return content[0]
         }
-        content = content[1].replaceAll("\r\n", "").replaceAll("\n", "")
+        content = content[1]
 
         content = content.split("<")
         for(let i = 1; i < content.length; i++){
