@@ -243,14 +243,11 @@ class Input {
         this.res_should_process.querySelector(".value").innerText = analyzed.should_process
 
         this.colored_words.innerHTML = ""
-        let content = text.split(" ")
+        let content = text.split(/(\s+)/)
         let cur_word_index = 0
 
         for(let i = 0; i < content.length; i++){
-            if(i != 0){
-                content[i] = " " + content[i]
-            }
-            
+                       
             if(content[i] == "" || isspace(content[i])){
                 add_text_to_node(this.colored_words, content[i])
                 continue
