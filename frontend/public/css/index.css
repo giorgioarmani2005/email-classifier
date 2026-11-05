@@ -104,6 +104,8 @@
 
     --bar-color1: hsl(193, 100%, 74%);
     --bar-color2: hsl(249, 100%, 79%);
+
+    --color-error: #ff4545;
 } 
 
 
@@ -250,18 +252,61 @@ header > * {
 }
 
 header > * > * {
+    position: relative;
     transition: scale 0.2s;
 }
+
+header > * > * > .popup {
+    position: absolute;
+    top: 2rem;
+    left: 1rem;
+    translate: -20%;
+    width: max-content;
+    pointer-events: none;
+    box-sizing: border-box;
+
+    border-radius: 0.4rem;
+    border-color: var(--color1);
+    border-width: 0.04rem;
+    border-style: solid;
+    background-color: #00000024;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 50px -15px var(--color1);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+header > * > * > .popup img {
+    width: 10rem;
+    border-radius: 0.4rem;
+    border-color: var(--color1);
+    border-width: 0.04rem;
+    border-style: solid;
+    box-shadow: 0 0 50px -20px var(--color1);
+}
+
+header > * > *:hover > .popup {
+    opacity: 1;
+}
+
 
 header > *:hover {
     background-color: #a9d5ff25;
 }
 
-header > *:hover > * {
+header > *.history:hover > * {
     scale: 1.07;
 }
 
-header > *:active > * {
+header > *.history:active > * {
     scale: 1;
 }
 
@@ -269,6 +314,8 @@ header .history {
     width: 2rem;
     height: 2rem; 
 }
+
+
 
 
 
@@ -291,6 +338,11 @@ header .history {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    pointer-events: none;
+}
+
+.side-bar-container:has(.side-bar.show){
+    pointer-events: auto;
 }
 
 .side-bar-container > .filler{
@@ -314,6 +366,8 @@ header .history {
     padding: 0.5rem;
     gap: 0.5rem;
     flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: scroll;
 
     translate: -109% 0;
     transition: translate 0.2s;
@@ -327,13 +381,13 @@ header .history {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 3.5rem;
+    min-height: 3.5rem;
     font-size: 1.2rem;
 }
 
 .side-bar .elem {
     width: 21rem;
-    height: 2.6rem;
+    min-height: 2.6rem;
     background-color: rgb(11, 6, 40);
 
     border-color: var(--color1);
@@ -344,11 +398,38 @@ header .history {
     background-color: #00000000;
     backdrop-filter: blur(7px);
     box-shadow: 0 0 20px -4.5px var(--color1);
+    font-size: 0.8rem;
     
     display: flex;
     padding: 0.2rem 0.4rem;
     gap: 0.4rem;
     box-sizing: border-box;
+    user-select: none;
+
+    transition: transform 0.1s;
+}
+
+.side-bar .elem:hover{
+    transform: translate(0.55rem, -0.1rem) rotate(1.3deg) scale(1.07);
+}
+
+.side-bar .elem:active{
+    box-shadow: 0 0 20px 0px var(--color1);
+    transform: translate(0rem, 0rem) rotate(0deg);
+}
+
+/* .side-bar .elem.hover{
+    transform: translate(0.55rem, -0.1rem) rotate(1.3deg);
+} */
+
+.side-bar .elem.error {
+    justify-content: center;
+    align-items: center;
+    color: var(--color-error);
+    border-color: var(--color-error);
+    box-shadow: 0 0 20px -4.5px var(--color-error);
+    filter: brightness(67%);
+    pointer-events: none;
 }
 
 .side-bar .elem .text {
@@ -363,6 +444,57 @@ header .history {
     font-size: 0.7rem;
     filter: brightness(80%);
     min-width: max-content;
+}
+
+.side-bar.loading > .elem {
+    display: none;
+}
+
+.side-bar.loading::after {
+    content: "Загрузка....";
+    display: flex;
+    width: 21rem;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.5rem;
+    translate: 0 -3.5rem;
+}
+
+.side-bar.empty > .elem {
+    display: none;
+}
+
+.side-bar.empty::after {
+    content: "Пусто)....";
+    display: flex;
+    width: 21rem;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.5rem;
+    translate: 0 -3.5rem;
+}
+
+.side-bar.error{
+    border-color: var(--color-error);
+    box-shadow: 0 0 20px -4.5px var(--color-error);
+}
+
+.side-bar.error > .elem {
+    display: none;
+}
+
+.side-bar.error::after {
+    content: "Ошибка загрузки";
+    display: flex;
+    width: 21rem;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.5rem;
+    translate: 0 -3.5rem;
+    color: var(--color-error);
 }
 
 
@@ -411,7 +543,29 @@ header .history {
     box-shadow: 0 0 50px -20px var(--color1);
 
     flex: 1 1 0;
-    transition: flex-grow 0.4s;
+    transition: flex-grow 0.4s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.input.error{
+    border-color: var(--color-error);
+    box-shadow: 0 0 50px -20px var(--color-error);
+}
+
+.input.error::after {
+    display: flex;
+    content: "Ошибка анализа";
+    opacity: 1;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--color-error);
+}
+
+.input.error * {
+    opacity: 0;
 }
 
 .input * {

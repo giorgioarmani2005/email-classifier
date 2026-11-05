@@ -27,13 +27,14 @@ class UploadedEmlRequest(ContentRequest):
         return value
 
 
+# Ну response должен же содержать ответ, короче я убрал опцию ответов быть None
 class AnalyzeResponse(BaseModel):
-    triage: str | None = None
-    triage_confidence: float | None = None
-    priority: str | None = None
-    priority_confidence: float | None = None
-    risk: str | None = None
-    risk_confidence: float | None = None
-    should_process: str | None = None
-    should_process_confidence: float | None = None
-    shap_indices: List[int] | None = None
+    triage: str
+    triage_confidence: float
+    priority: str
+    priority_confidence: float
+    risk: str
+    risk_confidence: float
+    should_process: str
+    should_process_confidence: float
+    shap_indices: list[int]

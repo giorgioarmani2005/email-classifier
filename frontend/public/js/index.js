@@ -87,14 +87,23 @@ function generate_stars(background_node){
 }
 
 async function analyze_text(text){
-    let resp = await fetch(`http://${backend_host}:${backend_port}/api/v1/analyze/text`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({content: textarea.value}),
-        credentials: "include",
-    });
+    try{
+        let resp = await fetch(`http://${backend_host}:${backend_port}/api/v1/analyze/text`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({content: textarea.value}),
+            credentials: "include",
+        });
 
-    return await resp.json()
+        if(!resp.ok){
+            return null
+        }
+    
+        return await resp.json()
+    }
+    catch(error){
+        return null
+    }
 }
 
 
@@ -113,9 +122,10 @@ class Input {
         this.res_should_process = result.querySelector(".should-process")
         this.colored_words = input.querySelector(".colored-words")
         
-
         this.button_cancel.disabled = true
         this.button_analyze.disabled = true
+
+        this.is_analyzing = false
     }
 
     parse_eml(content){
@@ -145,6 +155,12 @@ class Input {
     }
 
     text_show(content_to_show = null, plain_text = true){
+        if(this.is_analyzing){
+            return
+        }
+
+        this.input.classList.remove('error')
+
         this.result.classList.add('hidden')
         this.input.classList.add('show-text')
         this.button_cancel.disabled = false
@@ -158,6 +174,15 @@ class Input {
     }
 
     text_hide(){
+        if(this.is_analyzing){
+            return
+        }
+
+        if(this.input.classList.contains('error')){
+            this.input.classList.remove('error')
+            return
+        }
+
         this.result.classList.add('hidden')
         this.input.classList.remove('show-text')
         this.button_cancel.disabled = true
@@ -170,30 +195,41 @@ class Input {
     }
 
     async analyze(){
+        if(this.is_analyzing){
+            return
+        }
         if(!this.input.classList.contains("show-text")){
             return
         }
-        this.result.classList.add('hidden')
         this.button_cancel.disabled = true
         this.button_analyze.disabled = true
         this.button_analyze.innerText = "Анализируем...."
         this.textarea.readOnly = true;
         this.textarea.blur();
         this.textarea.style.pointerEvents = "none";
-        let analyzed = await analyze_text(this.textarea.value)  
         
-        this.set_result(this.textarea.value, analyzed)
+        this.is_analyzing = true
+        let analyzed = await analyze_text(this.textarea.value)  
+        this.is_analyzing = false
+        if(analyzed !== null){
+            this.set_result(this.textarea.value, analyzed)
+        }
+        else{
+            this.input.classList.add('error')
+        }
 
         this.button_cancel.disabled = false
         this.button_analyze.disabled = false  
         this.button_analyze.innerText = "Анализировать"
-
-        this.result.classList.remove('hidden')
-        this.colored_words.style.display = "block"
-        this.textarea.style.display = "none"
     }
 
     set_result(text, analyzed){
+        if(this.is_analyzing){
+            return
+        }
+
+        this.input.classList.remove('error')
+
         setTimeout(() => {
             this.res_triage.style.setProperty("--len", `${analyzed.triage_confidence}`)
             this.res_priority.style.setProperty("--len", `${analyzed.priority_confidence}`)
@@ -232,24 +268,32 @@ class Input {
 
             cur_word_index++
         }
+
+        this.result.classList.remove('hidden')
+        this.colored_words.style.display = "block"
+        this.textarea.style.display = "none"
     }
 }
 
 class History {
-    // record = {
-    //     id: 0,
-    //     date: "" | null,
-    //     content: "asda" | null,
-    //     analyze: | null ...
-    // }
 
-    constructor(history){
+    constructor(input_controller, history){
+        this.input_controller = input_controller
         this.history = history
-        this.records = []
+        this.records = {}
+        this.error_loading = false
     }
 
     async update(){
-
+        try{
+            await this.update_ids()
+            await this.get_what_changed()
+            this.error_loading = false
+        }
+        catch(error){
+            this.error_loading = true
+        }
+        this.render()
     }
 
     async get_ids(){
@@ -257,6 +301,11 @@ class History {
             method: "GET",
             credentials: "include",
         });
+
+        if(!resp.ok){
+            return null
+        }
+
         return (await resp.json()).ids
     }
 
@@ -265,87 +314,130 @@ class History {
             method: "GET",
             credentials: "include",
         });
+
+        if(!resp.ok){
+            return null
+        }
+
         return await resp.json()
     }
 
     async update_ids(){
-        let ids = this.get_ids()
+        let ids = await this.get_ids()
+        if(ids === null){
+            this.error_loading = true
+            return 
+        }
+
         for(let i = 0; i < ids.length; i++){
-            if(!this.records.some((record) => {return record.id == ids[i]})){
-                this.records.push({
-                    id: ids[i],
-                    date: null,
-                    content: null,
-                    analyze: null
-                })
+            if(ids[i] in this.records){
+                continue
             }
+            this.records[ids[i]] = null
         }
     }
 
     async get_what_changed(){
-        for(let i = 0; i < this.records.length; i++){
-            if(this.records[i].date == null && this.records[i].analyzed == null && this.records[i].content == null){
-                this.records[i] = this.get_by_id(this.records[i].id)
+        for(let id in this.records){
+            if(this.records[id] === null){
+                this.records[id] = await this.get_by_id(id)
             }
         }
     }
 
     render(){
-        this.history.innerHTML = ""
-        for(let i = 0; i < this.records.length; i++){
-            let elem = document.createElement("div")
-            elem.classList.add("elem")
-            
-            let text = document.createElement("div")
-            text.classList.add("text")
-            text.innerText = this.records[i].content
-            let date = document.createElement("div")
-            date.classList.add("date")
-            date.innerText = this.format_date(this.records[i].date)
+        this.history.innerHTML = '<div class="title">История</div>'
+        this.history.classList.remove('loading')
+        if(this.error_loading){
+            this.history.classList.add('error')
+            return 
+        }
+        this.history.classList.remove('error')
+        if(Object.keys(this.records).length == 0){
+            this.history.classList.add('empty')
+            return
+        }
+        this.history.classList.remove('empty')
 
-            elem.appendChild(text)            
-            elem.appendChild(date)            
+        for(let id of Object.keys(this.records).sort().reverse()){
+            let elem = document.createElement('div')
+            elem.classList.add('elem')
+
+            if(this.record_is_invalid(this.records[id])){
+                elem.classList.add('error')
+                elem.innerText = "Ошибка загрузки";
+                this.history.appendChild(elem)
+                continue
+            }
+
+            let text = document.createElement('div')
+            text.classList.add('text')
+            text.innerText = this.format_text(this.records[id].content)
+            
+            let date = document.createElement('div')
+            date.classList.add('date')
+            date.innerText = this.format_date(this.records[id].date)
+
+            elem.appendChild(text)
+            elem.appendChild(date)
+
+            elem.addEventListener("click", () => {
+                this.input_controller.text_show(this.records[id].content, true)
+                this.input_controller.set_result(this.records[id].content, this.records[id].analyzed)
+                this.input_controller.input.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            })
+
+            this.history.appendChild(elem)
         }
     }
 
-    format_date(date){
-        date = Date(date)
-
-        let yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1); 
-
-        return date.toLocaleDateString("ru-RU", {
-            year, month, day, hour, minute
-        })
+    record_is_invalid(record){
+        if(record === null){
+            return true
+        }
+        if(record.date === null || record.analyzed === null || record.content === null){
+            return true
+        }
+        return false
     }
 
-//   Параметр	Значения	Результат
-//   weekday	"long"	    четверг
-// 	             "short"	 чт
-// 	             "narrow"	Ч
-//    era	     "long"	  от Рождества Христова
-// 	             "short"	н. э.
-// 	             "narrow"	н. э.
-// year	        "numeric"	  2026
-// 	             "2-digit"	   26
-// month	    "numeric"	   11
-// 	              "2-digit"	   11
-// 	              "long"	   ноября
-// 	              "short"	   нояб.
-// 	              "narrow"	   Н
-// day	           "numeric"	5
-// 	                "2-digit"	05
+    format_text(text){
+        text = text.replaceAll('\n', ' ')
+        if(text.length > 70){
+            text = text.slice(0, 70) + '...'  
+        }
+        return text
+    }
 
-// Параметр	 Значения	Результат
-// hour	    "numeric"	      14
-// 	        "2-digit"	      14
-// minute	"numeric"	   30
-// 	        "2-digit"	   30
-// second	"numeric"	   45
-// 	       "2-digit"	   45
-// dayPeriod	"long"	дня
-// 	           "short"	дня
-// 	           "narrow"	д
+    format_date(date){
+        date = new Date(date)
+        let now = new Date()
+        let today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        let target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+        let diff = Math.floor((today - target) / 86400000)
+
+        if(diff === 0){
+            return date.toLocaleTimeString("ru-RU")
+        }
+
+        if(diff === 1){
+            return "вчера"
+        }
+
+        if(diff < 7){
+            return date.toLocaleDateString("ru-RU", {weekday: "long"})
+        }
+
+        if(date.getFullYear() === now.getFullYear()){
+            return date.toLocaleDateString("ru-RU", {day: "numeric", month: "long"})
+        }
+
+        return date.toLocaleDateString("ru-RU")
+    }
 }
 
 
@@ -371,9 +463,21 @@ generate_stars(background)
 
 let input_controller = new Input(input, textarea, button_cancel, button_analyze, result)
 
+let history_controller = new History(input_controller, history)
 
 
 
+
+
+setTimeout(async () => {
+    await history_controller.update()
+}, 0)
+
+setInterval(async () => {
+    if(history_controller.error_loading){
+        await history_controller.update()
+    }
+}, 3000)
 
 
 history_button.addEventListener("click", () => {
@@ -404,9 +508,13 @@ text.addEventListener('input', () => {
     input_controller.text_show()
 })
 
-text.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', (e) => {
     if(e.code == 'Escape'){
         input_controller.text_hide()
+    }
+    if(e.code == 'Tab'){
+        e.preventDefault()
+        history.classList.toggle("show")
     }
 })
 
@@ -452,37 +560,8 @@ input.addEventListener("drop", async (event) => {
 
 button_analyze.addEventListener("click", async () => {
     await input_controller.analyze()
+    await history_controller.update()
 })
-
-
-
-
-// button_analyze.addEventListener("click", async () => {
-//     let response = await fetch("http://localhost:8000/api/v1/analyze/text", {
-//         method: "POST",
-//         headers: {
-//             "accept": "*/*",
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify({
-//             content: textarea.value,
-//         })
-//     });
-
-//     response = await response.json();
-
-//     if(response.status == "success"){
-//         textarea.value = "success"
-//     }
-//     else{
-//         textarea.value = "error"
-//     }
-// })
-
-
-
-
-
 
 
 

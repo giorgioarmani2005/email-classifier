@@ -67,3 +67,5 @@ class HistoryRepository:
         )
         await self.session.execute(stmt)
         await self.session.commit()
+
+    

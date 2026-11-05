@@ -66,8 +66,6 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
         )
     history_id = await history_service.new_history('analyzing', content, client_id, session)
 
-    # Я так понимаю ты тут просто зыбыл добавить run_in_threadpool. Поправь если не так
-    # response = await analyze_service.process_text(content.content)
     response = await run_in_threadpool(analyze_service.process_text, content.content, inference_model)
 
     # потом можно будет брокера подключить+celery
@@ -76,6 +74,7 @@ async def analyze_text(content: ContentRequest, client_id: str = Depends(set_coo
                                                 new_analyzed_date=datetime.now(),
                                                 new_analyzed_response=response.model_dump(mode="json"))
 
+    # нужен был response, вот поэтому вернул тут ну response
     # return {"status": "success",
     #         "message": "Текст успешно проанализирован"}
     return response
