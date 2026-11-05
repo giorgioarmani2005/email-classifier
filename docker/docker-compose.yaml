@@ -2,7 +2,7 @@ services:
 
   migrator:
     container_name: email-classifier-migrator
-    build: ../backend/
+    image: email-classifier-backend:latest
     depends_on:
       db:
         condition: service_healthy
@@ -33,6 +33,7 @@ services:
 
   backend:
     container_name: email-classifier-backend
+    image: email-classifier-backend:latest
     build: ../backend/
     depends_on:
       db:
