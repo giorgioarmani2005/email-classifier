@@ -3,6 +3,7 @@ services:
   migrator:
     container_name: email-classifier-migrator
     image: email-classifier-backend:latest
+    pull_policy: build
     depends_on:
       db:
         condition: service_healthy
