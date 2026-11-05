@@ -13,7 +13,7 @@ services:
     command: ["alembic", "upgrade", "head"]
     volumes:
       - ../backend/migrations:/app/migrations
-  
+
   db:
     container_name: email-classifier-db
     image: postgres:16-alpine
@@ -39,7 +39,7 @@ services:
         condition: service_healthy
     networks:
       - backend_net
-     # - frontend_net
+      - frontend_net
     ports:
       - "8000:8000"
     env_file:
@@ -50,19 +50,25 @@ services:
       timeout: 5s
       retries: 5
 
-  # frontend:
-  #   #TODO: Добавить проброс портов, после выбора фреймворка для фронтенда
-  #   container_name: email-classifier-frontend
-  #   build: ../frontend/
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   networks:
-  #     - frontend_net
+  frontend:
+    container_name: email-classifier-frontend
+    build: ../frontend/
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - frontend_net
+    ports:
+      - "5500:5500"
+    env_file:
+      - ../.env
+    volumes:
+      - ../.env:/.env:ro
+    command: ["sh", "-c", "python setup.py && uvicorn main:app --host 0.0.0.0 --port 5500"]
 
 volumes:
   pg_data:
 
 networks:
-  #frontend_net:
   backend_net:
+  frontend_net:

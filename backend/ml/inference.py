@@ -54,21 +54,25 @@ def _remove_citations(text: str) -> str:
 
 def parse_content(content: str) -> str:
     content = _remove_citations(content)
-    subject_m = re.search(r"^Subject:\s*(.+?)(?=\n\w+:|\Z)", content, re.I | re.M)
-    body_m = re.search(r"^Body:\s*(.+)$", content, re.I | re.M | re.DOTALL)
+    subject_m = re.search(r"^Subject:[ \t]*(.+?)(?=\n[ \t]*\w+:|\Z)", content, re.I | re.M)
+    body_m = re.search(r"^Body:[ \t]*(.+)$", content, re.I | re.M | re.DOTALL)
 
-    # У нас вообще никогда нету в письме Body и Subject, вообще возможно стоит подправить бэк, чтобы это добавить, но хотя бы так сделал пока
-    if subject_m or body_m:
-        parts = []
-        if subject_m:
-            parts.append("Subject: " + subject_m.group(1).strip())
-        if body_m:
-            parts.append("Body: " + body_m.group(1).strip())
+    if subject_m and body_m:
+        subject = subject_m.group(1).strip()
+        body = body_m.group(1).strip()
+    elif subject_m:
+        subject = subject_m.group(1).strip()
+        rest = content[subject_m.end():]
+        rest = re.sub(r"^\s*Body:[ \t]*", "", rest, flags=re.I)
+        body = rest.strip()
+    elif body_m:
+        subject = ""
+        body = body_m.group(1).strip()
     else:
-        parts = ["Body: " + content.strip()]
+        subject = ""
+        body = content.strip()
 
-    return re.sub(r"\s+", " ", " ".join(parts)).strip()
-
+    return re.sub(r"\s+", " ", f"Subject: {subject} Body: {body}").strip()
 
 def word_indices_in_content(content: str, words: list) -> list[int]:
     tokens = content.split()
@@ -96,7 +100,11 @@ def word_indices_in_content(content: str, words: list) -> list[int]:
         match_count = 0
         found = -1
         for i in range(search_start, len(low_tokens)):
-            if w in low_tokens[i]:
+            if w.isalnum():
+                matched = (low_tokens[i] == w)
+            else:
+                matched = (w in low_tokens[i])
+            if matched:
                 if match_count == nth:
                     found = i
                     break
