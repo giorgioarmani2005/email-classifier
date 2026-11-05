@@ -359,11 +359,28 @@ class History {
         }
         this.history.classList.remove('empty')
 
-        for(let id of Object.keys(this.records).sort().reverse()){
+        let sorted = Object.values(this.records).sort((r1, r2) => {
+            
+            if(this.record_is_invalid(r1) && this.record_is_invalid(r2)){
+                return 0
+            }
+            if(this.record_is_invalid(r1)){
+                return -1
+            }
+            if(this.record_is_invalid(r2)){
+                return 1;
+            }
+
+            let r1_date = new Date(r1.date)
+            let r2_date = new Date(r2.date)
+
+            return r1_date - r2_date 
+        })
+        for(let record of sorted.reverse()){
             let elem = document.createElement('div')
             elem.classList.add('elem')
 
-            if(this.record_is_invalid(this.records[id])){
+            if(this.record_is_invalid(record)){
                 elem.classList.add('error')
                 elem.innerText = "Ошибка загрузки";
                 this.history.appendChild(elem)
@@ -372,18 +389,18 @@ class History {
 
             let text = document.createElement('div')
             text.classList.add('text')
-            text.innerText = this.format_text(this.records[id].content)
+            text.innerText = this.format_text(record.content)
             
             let date = document.createElement('div')
             date.classList.add('date')
-            date.innerText = this.format_date(this.records[id].date)
+            date.innerText = this.format_date(record.date)
 
             elem.appendChild(text)
             elem.appendChild(date)
 
             elem.addEventListener("click", () => {
-                this.input_controller.text_show(this.records[id].content, true)
-                this.input_controller.set_result(this.records[id].content, this.records[id].analyzed)
+                this.input_controller.text_show(record.content, true)
+                this.input_controller.set_result(record.content, record.analyzed)
                 this.input_controller.input.scrollIntoView({
                     behavior: "smooth",
                     block: "start"

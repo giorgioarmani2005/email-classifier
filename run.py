@@ -27,13 +27,15 @@ class Settings(BaseSettings):
 
 
 
-
 # install postgres
 # install requirements for python (pip install -r ./backend/requirements.txt)
 # install requirements for python 2 (pip install -r ./frontend/requirements.txt)
 # copy ./.env.example into ./.env and fill it in
 
 
+# для установки cuda (nvidia должна быть)
+# sudo python -m pip uninstall torch torchvision torchaudio -y
+# sudo python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 
 
 

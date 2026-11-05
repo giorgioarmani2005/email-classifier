@@ -45,4 +45,4 @@ Authentication-Results: mxs.mail.ru; spf=pass (exim-mx-canary-30-8f755cd6f-nw98j
 	 dkim=pass header.d=yandex.ru; dmarc=pass header.from=y.rodnova@yandex.ru
 X-Mailru-Intl-Transport: d,b5aeec2
 
-<br />Добрый вечер! По вашей просьбе вам были присланы 3 письма, включая данное.<div><br /></div><div>С уважением, Юлия<br />-- <br />Отправлено из мобильного приложения Яндекс Почты</div>
+<br />Good evening! At your request, three emails have been sent to you, including this one.<div><br /></div><div>Sincerely, Yulia<br />-- <br />Sent from the Yandex Mail mobile app</div>

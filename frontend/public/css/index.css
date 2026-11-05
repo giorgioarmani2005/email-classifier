@@ -434,6 +434,9 @@ header .history {
 
 .side-bar .elem .text {
     width: 100%;
+    overflow-wrap: break-word;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 .side-bar .elem .date {
@@ -617,6 +620,9 @@ header .history {
     font-size: 0.834rem;
 
     box-sizing: border-box;
+    overflow-wrap: break-word;
+    overflow-y: scroll;
+    overflow-x: hidden;
 
     
     width: 6rem;
